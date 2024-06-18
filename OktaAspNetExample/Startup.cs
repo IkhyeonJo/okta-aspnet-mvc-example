@@ -11,6 +11,7 @@ using IdentityModel.Client;
 using System;
 using System.Collections.Generic;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNet.Identity;
 
 [assembly: OwinStartup(typeof(OktaAspNetExample.Startup))]
 
@@ -31,9 +32,17 @@ namespace OktaAspNetExample
         /// <param name="app"></param>
         public void Configuration(IAppBuilder app)
         {
-            app.SetDefaultSignInAsAuthenticationType(CookieAuthenticationDefaults.AuthenticationType);
+            app.SetDefaultSignInAsAuthenticationType(DefaultAuthenticationTypes.ApplicationCookie);
 
-            app.UseCookieAuthentication(new CookieAuthenticationOptions());
+            app.UseCookieAuthentication(new CookieAuthenticationOptions
+            {
+                AuthenticationType = DefaultAuthenticationTypes.ApplicationCookie,
+                LoginPath = new PathString("/Account/Login"),
+                ExpireTimeSpan = TimeSpan.FromMinutes(2880),
+                CookieSecure = CookieSecureOption.Always, // https ( server )
+                //CookieSecure = CookieSecureOption.Never, // https && http ( dev)
+                CookieName = "CalyxCookie"
+            });
 
             app.UseOpenIdConnectAuthentication(new OpenIdConnectAuthenticationOptions
             {
